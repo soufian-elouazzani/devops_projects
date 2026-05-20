@@ -10,5 +10,5 @@ A simple static site for practicing GitHub Actions and GitHub Pages deployments.
 * A minimal setup that is easy to modify for workflow practice
 
 ## the Project of Server Performance Stats in the server_performance_stats branch:  
-*Projet URL: https://roadmap.sh/projects/server-stats*    
-*Branch : server_performance_stats*
+*Projet URL: https://roadmap.sh/projects/github-actions-deployment-workflow*    
+*Branch : gh-deployment-workflow*
