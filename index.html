@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A simple static website for practicing GitHub Actions and GitHub Pages deployment.">
+    <title>Workflow Playground</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0f1020;
+            --bg-soft: #171934;
+            --panel: rgba(19, 22, 46, 0.82);
+            --panel-strong: rgba(31, 36, 71, 0.92);
+            --text: #f5f3ff;
+            --muted: #bdb8d9;
+            --accent: #6ee7f9;
+            --accent-strong: #8b5cf6;
+            --accent-warm: #f59e0b;
+            --border: rgba(255, 255, 255, 0.12);
+            --shadow: 0 24px 60px rgba(3, 6, 23, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(139, 92, 246, 0.28), transparent 28%),
+                radial-gradient(circle at top right, rgba(110, 231, 249, 0.18), transparent 24%),
+                linear-gradient(160deg, #090a14 0%, #111428 45%, #0f1020 100%);
+            color: var(--text);
+            font-family: "Palatino Linotype", Palatino, Georgia, serif;
+            line-height: 1.5;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 70px 70px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 85%);
+            opacity: 0.35;
+        }
+
+        .shell {
+            position: relative;
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 40px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding: 16px 18px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: rgba(6, 9, 24, 0.56);
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            font: 700 0.82rem/1.1 "Trebuchet MS", Verdana, sans-serif;
+        }
+
+        .brand-mark {
+            width: 14px;
+            height: 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            box-shadow: 0 0 0 6px rgba(110, 231, 249, 0.12);
+        }
+
+        .status {
+            text-align: right;
+            font: 600 0.9rem/1.4 "Trebuchet MS", Verdana, sans-serif;
+            color: var(--muted);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.4fr 0.9fr;
+            gap: 22px;
+            align-items: stretch;
+            margin-bottom: 22px;
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            background: var(--panel);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-main {
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-main::after {
+            content: "";
+            position: absolute;
+            inset: auto -90px -110px auto;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(110, 231, 249, 0.28), transparent 72%);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--accent);
+            font: 700 0.82rem/1 "Trebuchet MS", Verdana, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-warm);
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.55);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.8rem, 6vw, 5.6rem);
+            line-height: 0.95;
+            letter-spacing: -0.05em;
+        }
+
+        .intro {
+            max-width: 56ch;
+            margin: 18px 0 0;
+            color: var(--muted);
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+            font-size: 1.04rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .button {
+            appearance: none;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 13px 18px;
+            font: 700 0.92rem/1 "Trebuchet MS", Verdana, sans-serif;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button.primary {
+            background: linear-gradient(135deg, var(--accent), #d8f9ff);
+            color: #08111f;
+        }
+
+        .button.secondary {
+            border-color: rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        .hero-side {
+            display: grid;
+            gap: 18px;
+        }
+
+        .metric,
+        .card {
+            padding: 22px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            background: var(--panel-strong);
+            box-shadow: var(--shadow);
+        }
+
+        .metric-label {
+            margin-bottom: 10px;
+            color: var(--muted);
+            font: 700 0.8rem/1 "Trebuchet MS", Verdana, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .metric-value {
+            font-size: clamp(2rem, 4vw, 3.1rem);
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .metric-note {
+            margin-top: 12px;
+            color: var(--muted);
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+        }
+
+        .steps {
+            display: grid;
+            gap: 14px;
+        }
+
+        .steps-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .steps-header h2,
+        .grid h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            letter-spacing: -0.02em;
+        }
+
+        .steps-header span {
+            color: var(--muted);
+            font: 600 0.82rem/1.4 "Trebuchet MS", Verdana, sans-serif;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 14px;
+            align-items: start;
+            padding: 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .step-number {
+            display: inline-grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            background: rgba(110, 231, 249, 0.16);
+            color: var(--accent);
+            font: 700 0.92rem/1 "Trebuchet MS", Verdana, sans-serif;
+        }
+
+        .step strong {
+            display: block;
+            margin-bottom: 4px;
+            font: 700 1rem/1.2 "Trebuchet MS", Verdana, sans-serif;
+        }
+
+        .step p,
+        .card p,
+        .footer {
+            margin: 0;
+            color: var(--muted);
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin: 22px 0;
+        }
+
+        .card {
+            min-height: 100%;
+        }
+
+        .card h2 {
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-flex;
+            margin-bottom: 14px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(245, 158, 11, 0.14);
+            color: #fcd68a;
+            font: 700 0.76rem/1 "Trebuchet MS", Verdana, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+        }
+
+        .footer {
+            padding: 8px 2px 0;
+            text-align: center;
+            font-size: 0.92rem;
+        }
+
+        @media (max-width: 880px) {
+            .hero,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .status {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .shell {
+                width: min(100% - 20px, 1120px);
+                padding-top: 12px;
+            }
+
+            .hero-main {
+                padding: 26px;
+            }
+
+            .metric,
+            .card {
+                padding: 18px;
+            }
+
+            h1 {
+                font-size: clamp(2.4rem, 14vw, 4rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header class="topbar panel">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span>Workflow Playground</span>
+            </div>
+            <div class="status">
+                <div id="clock">--:--:--</div>
+                <div>Static site for GitHub Actions practice</div>
+            </div>
+        </header>
+
+        <section class="hero">
+            <article class="hero-main panel">
+                <div class="eyebrow">GitHub Actions practice site</div>
+                <h1>Build, test, and deploy your workflow ideas.</h1>
+                <p class="intro">
+                    This page is intentionally simple: one static HTML file, a clean visual layout, and a deploy workflow you can use to practice pushing changes through GitHub Actions.
+                </p>
+                <div class="actions">
+                    <a class="button primary" href="#practice">See the practice flow</a>
+                    <a class="button secondary" href="#checks">View what to automate</a>
+                </div>
+            </article>
+
+            <aside class="hero-side">
+                <div class="metric">
+                    <div class="metric-label">Current focus</div>
+                    <div class="metric-value">Static + CI</div>
+                    <div class="metric-note">A lightweight site that makes workflow iteration fast.</div>
+                </div>
+
+                <div class="card" id="practice">
+                    <div class="steps-header">
+                        <h2>Practice flow</h2>
+                        <span>3 steps</span>
+                    </div>
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">01</div>
+                            <div>
+                                <strong>Commit a visual change</strong>
+                                <p>Edit copy, colors, or spacing to see the deploy pipeline react.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">02</div>
+                            <div>
+                                <strong>Let Actions publish it</strong>
+                                <p>The workflow copies the site into a deployable artifact.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">03</div>
+                            <div>
+                                <strong>Verify the result</strong>
+                                <p>Refresh the live site and confirm the latest push is visible.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="grid" id="checks">
+            <article class="card">
+                <div class="tag">Build</div>
+                <h2>Keep the pipeline tiny</h2>
+                <p>For practice, the workflow only needs checkout, a quick prep step, and a deploy action. That keeps failures easy to read.</p>
+            </article>
+
+            <article class="card">
+                <div class="tag">Review</div>
+                <h2>Make changes visible</h2>
+                <p>Use obvious edits, like text or color updates, so every run proves whether the workflow picked up your commit.</p>
+            </article>
+
+            <article class="card">
+                <div class="tag">Deploy</div>
+                <h2>Practice GitHub Pages</h2>
+                <p>This repository is set up to publish a static artifact, which is a good fit for learning GitHub Pages deployments.</p>
+            </article>
+        </section>
+
+        <p class="footer">Static website starter for GitHub Actions practice.</p>
+    </main>
+
+    <script>
+        const clock = document.getElementById("clock");
+
+        function updateClock() {
+            const now = new Date();
+            clock.textContent = now.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
