@@ -1,0 +1,107 @@
+---
+- name: Web server setup
+  hosts: web
+  become: true
+  gather_facts: true
+
+  vars:
+    website_tarball: "./website.tar.gz"
+    website_name: "site"
+    website_root: "/var/www/{{ website_name }}"
+    nginx_server_name: "_"
+    ssh_public_key: "ssh-ed25519 REPLACE_WITH_YOUR_PUBLIC_KEY your-name"
+
+  tasks:
+    - name: Base | Update package cache and install basic utilities
+      ansible.builtin.package:
+        name:
+          - curl
+          - wget
+          - unzip
+          - fail2ban
+        state: present
+        update_cache: true
+      tags:
+        - base
+
+    - name: Base | Enable and start fail2ban
+      ansible.builtin.service:
+        name: fail2ban
+        state: started
+        enabled: true
+      tags:
+        - base
+
+    - name: Nginx | Install nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+      tags:
+        - nginx
+
+    - name: Nginx | Create website root
+      ansible.builtin.file:
+        path: "{{ website_root }}"
+        state: directory
+        mode: "0755"
+      tags:
+        - nginx
+        - app
+
+    - name: Nginx | Configure site
+      ansible.builtin.copy:
+        dest: /etc/nginx/sites-available/site.conf
+        mode: "0644"
+        content: |
+          server {
+              listen 80;
+              server_name {{ nginx_server_name }};
+
+              root {{ website_root }};
+              index index.html;
+
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }
+      notify: Restart nginx
+      tags:
+        - nginx
+
+    - name: Nginx | Enable site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/site.conf
+        dest: /etc/nginx/sites-enabled/site.conf
+        state: link
+      notify: Restart nginx
+      tags:
+        - nginx
+
+    - name: App | Upload website tarball
+      ansible.builtin.copy:
+        src: "{{ website_tarball }}"
+        dest: "/tmp/{{ website_name }}.tar.gz"
+        mode: "0644"
+      tags:
+        - app
+
+    - name: App | Unpack website files
+      ansible.builtin.unarchive:
+        src: "/tmp/{{ website_name }}.tar.gz"
+        dest: "{{ website_root }}"
+        remote_src: true
+      tags:
+        - app
+
+    - name: SSH | Add public key for the deploy user
+      ansible.builtin.authorized_key:
+        user: "{{ ansible_user | default('ubuntu') }}"
+        key: "{{ ssh_public_key }}"
+      tags:
+        - ssh
+
+  handlers:
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
