@@ -1,0 +1,16 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*.tfvars
+!*.tfvars.example
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+.venv/
+*.retry
+projects/04-blue-green/.active

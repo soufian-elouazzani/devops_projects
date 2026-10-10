@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf install -y python3
+
+useradd --system --no-create-home --shell /usr/sbin/nologin platform || true
+install -d -o platform -g platform /usr/local/lib/platform-app
+
+cat > /usr/local/lib/platform-app/app.py <<'PY'
+${app_py}
+PY
+chown platform:platform /usr/local/lib/platform-app/app.py
+
+cat > /etc/platform-app.env <<EOF
+DEPLOY_COLOR=${color}
+APP_VERSION=${version}
+PORT=8080
+EOF
+
+cat > /etc/systemd/system/platform-app.service <<'UNIT'
+[Unit]
+Description=platform-lab application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=platform
+Group=platform
+EnvironmentFile=/etc/platform-app.env
+ExecStart=/usr/bin/python3 /usr/local/lib/platform-app/app.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now platform-app.service

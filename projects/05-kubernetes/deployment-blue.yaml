@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-app-blue
+  namespace: platform-lab
+  labels:
+    app: platform-app
+    color: blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: platform-app
+      color: blue
+  template:
+    metadata:
+      labels:
+        app: platform-app
+        color: blue
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: platform-lab:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DEPLOY_COLOR
+              value: blue
+            - name: APP_VERSION
+              value: "1.0.0"
+            - name: PORT
+              value: "8080"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

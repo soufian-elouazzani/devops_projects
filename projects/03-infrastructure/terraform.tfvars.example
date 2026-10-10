@@ -1,0 +1,10 @@
+aws_region         = "eu-west-1"
+project_name       = "platform-lab"
+environment        = "dev"
+active_color       = "blue"
+canary_weight      = 0
+warm_standby       = false
+app_version_blue   = "1.0.0"
+app_version_green  = "1.0.0"
+desired_capacity   = 1
+instance_type      = "t3.micro"

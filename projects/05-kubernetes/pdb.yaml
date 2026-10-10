@@ -1,0 +1,23 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: platform-app-blue
+  namespace: platform-lab
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: platform-app
+      color: blue
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: platform-app-green
+  namespace: platform-lab
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: platform-app
+      color: green

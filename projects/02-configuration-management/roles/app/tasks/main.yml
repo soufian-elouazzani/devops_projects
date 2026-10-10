@@ -1,0 +1,49 @@
+---
+- name: App | Ensure the service account exists
+  ansible.builtin.user:
+    name: platform
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: App | Create the install directory
+  ansible.builtin.file:
+    path: /usr/local/lib/platform-app
+    state: directory
+    owner: platform
+    group: platform
+    mode: "0755"
+
+- name: App | Install the application
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../app/app.py"
+    dest: /usr/local/lib/platform-app/app.py
+    owner: platform
+    group: platform
+    mode: "0644"
+  notify: Restart platform-app
+
+- name: App | Install the environment file
+  ansible.builtin.template:
+    src: platform-app.env.j2
+    dest: /etc/platform-app.env
+    owner: root
+    group: platform
+    mode: "0640"
+  notify: Restart platform-app
+
+- name: App | Install the systemd unit
+  ansible.builtin.template:
+    src: platform-app.service.j2
+    dest: /etc/systemd/system/platform-app.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart platform-app
+
+- name: App | Enable the service
+  ansible.builtin.systemd:
+    name: platform-app
+    enabled: true
+    state: started
+    daemon_reload: true

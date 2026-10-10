@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevOps portfolio</title>
+  <meta name="description" content="A single service carried through infrastructure as code, blue-green releases, Kubernetes, and observability.">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f1ea;
+      --ink: #1c1915;
+      --muted: #5c564c;
+      --line: #d9d2c5;
+      --accent: #0f6e6b;
+      --card: #fffdf8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 18px/1.5 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    }
+
+    main {
+      width: min(820px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 72px;
+    }
+
+    header { margin-bottom: 36px; }
+
+    p.kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font: 600 13px/1.4 ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 42px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    header p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+    h2 {
+      margin: 36px 0 12px;
+      font-size: 22px;
+    }
+
+    ol { margin: 0; padding: 0; list-style: none; }
+
+    li {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin: 0 0 10px;
+    }
+
+    li strong { display: block; font-size: 18px; }
+
+    li span { color: var(--muted); }
+
+    a { color: var(--accent); }
+
+    code {
+      font: 14px/1.4 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      background: #efeae1;
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+
+    .demo {
+      background: #1c1915;
+      color: #f4f1ea;
+      border-radius: 12px;
+      padding: 16px 18px;
+      overflow: auto;
+      font: 14px/1.6 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+
+    footer {
+      margin-top: 36px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">DevOps portfolio</p>
+      <h1>One service, from a host to a blue-green release.</h1>
+      <p>
+        A personal lab. The same application exposes <code>/health</code>, <code>/version</code>, and <code>/metrics</code>.
+        Infrastructure, configuration management, Kubernetes, and Prometheus all speak that contract.
+        The repository is the long form.
+      </p>
+    </header>
+
+    <h2>What is in the repository</h2>
+    <ol>
+      <li><strong>Host health snapshot</strong><span>Read-only Linux report with thresholds and a JSON mode.</span></li>
+      <li><strong>Ansible</strong><span>Roles for a baseline, a systemd service, and nginx. Idempotent, with handlers.</span></li>
+      <li><strong>Terraform on AWS</strong><span>VPC, private instances, an ALB with blue and green weights, IMDSv2, SSM instead of SSH.</span></li>
+      <li><strong>Blue-green, runnable locally</strong><span>The idle copy is health-checked before nginx moves. Rollback is a pointer change.</span></li>
+      <li><strong>Kubernetes</strong><span>Probes, HPA, disruption budgets, a network policy, and a Service selector as the cutover.</span></li>
+      <li><strong>Prometheus and Grafana</strong><span>A scrape, two alert rules, and a dashboard that lives in Git.</span></li>
+      <li><strong>GitOps</strong><span>An Argo CD application. The cutover belongs in Git, or the controller will treat a patch as drift.</span></li>
+    </ol>
+
+    <h2>The demo</h2>
+    <pre class="demo">make demo
+./projects/04-blue-green/scripts/deploy.sh 1.4.0
+./projects/04-blue-green/scripts/rollback.sh</pre>
+
+    <footer>
+      <a href="https://github.com/soufian-elouazzani/devops_projects">soufian-elouazzani/devops_projects</a>
+      on <code>master</code>. Continuous integration tests the app, validates the Terraform, and dry-runs the manifests on every push.
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,6 @@
+---
+- name: Restart platform-app
+  ansible.builtin.systemd:
+    name: platform-app
+    state: restarted
+    daemon_reload: true

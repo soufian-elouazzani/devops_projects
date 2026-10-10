@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-app
+  namespace: platform-lab
+spec:
+  selector:
+    app: platform-app
+    # Traffic follows this label. A cutover changes color from blue to green.
+    # In GitOps that change is a commit. A kubectl patch drifts from this file
+    # until the next sync.
+    color: blue
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

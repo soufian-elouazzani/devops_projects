@@ -1,0 +1,17 @@
+# Remote state for anything beyond a solo lab.
+# Copy this over the local backend only after the bucket and lock table exist.
+# Do not commit a filled-in backend that points at an account you do not own.
+#
+# terraform {
+#   backend "s3" {
+#     bucket         = "platform-lab-tfstate"
+#     key            = "dev/terraform.tfstate"
+#     region         = "eu-west-1"
+#     dynamodb_table = "platform-lab-tflock"
+#     encrypt        = true
+#   }
+# }
+#
+# The bucket should block public access and deny unencrypted uploads.
+# The DynamoDB table needs a partition key named LockID (string).
+# State locking is what stops two applies from writing the same state at once.

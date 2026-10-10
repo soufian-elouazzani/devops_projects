@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    name: Application tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        working-directory: app
+        run: python3 -m unittest test_app -v
+
+  scripts:
+    name: Shell syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n
+        run: find projects -name '*.sh' -print0 | xargs -0 -n1 bash -n
+
+  ansible:
+    name: Ansible syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ansible-core
+        run: pip install ansible-core
+      - name: Syntax check
+        working-directory: projects/02-configuration-management
+        run: ansible-playbook --syntax-check site.yml
+
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/03-infrastructure
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.11.4"
+          terraform_wrapper: false
+      - name: Format
+        run: terraform fmt -check -recursive
+      - name: Init
+        run: terraform init -backend=false -input=false
+      - name: Validate
+        run: terraform validate
+
+  kubernetes:
+    name: Kubernetes manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - name: Install kubeconform
+        run: |
+          curl -fsSL -o /tmp/kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -C /tmp -xzf /tmp/kubeconform.tar.gz
+          sudo install -m 0755 /tmp/kubeconform /usr/local/bin/kubeconform
+      - name: Validate rendered manifests
+        run: |
+          kubectl kustomize projects/05-kubernetes \
+            | kubeconform -summary -strict -kubernetes-version 1.31.0
+
+  image:
+    name: Image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: docker build -t platform-lab:ci app

@@ -1,0 +1,16 @@
+[Unit]
+Description=platform-lab application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=platform
+Group=platform
+EnvironmentFile=/etc/platform-app.env
+ExecStart=/usr/bin/python3 /usr/local/lib/platform-app/app.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+---
+deploy_color: blue
+app_version: "1.0.0"
+app_port: 8080
+# Replace this before you enable the SSH task. The playbook skips the key
+# while the value still contains REPLACE_WITH.
+ssh_public_key: "ssh-ed25519 REPLACE_WITH_YOUR_PUBLIC_KEY you@example.com"

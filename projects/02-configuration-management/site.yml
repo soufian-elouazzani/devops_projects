@@ -1,0 +1,11 @@
+---
+- name: Configure web hosts for platform-lab
+  hosts: web
+  become: true
+  roles:
+    - role: common
+      tags: [base]
+    - role: app
+      tags: [app]
+    - role: nginx
+      tags: [nginx]
